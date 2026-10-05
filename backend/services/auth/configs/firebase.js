@@ -1,7 +1,17 @@
 import { initializeApp, cert } from "firebase-admin/app";
+import { createRequire } from "module";
 
-import serviceAccount from "../serviceAccountKey.json" with { type: "json" };
+let serviceAccount;
+
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  // Production: load from environment variable (JSON string)
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+  // Local development: load from file
+  const require = createRequire(import.meta.url);
+  serviceAccount = require("../serviceAccountKey.json");
+}
 
 export const app = initializeApp({
   credential: cert(serviceAccount),
-});
+});
