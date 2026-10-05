@@ -19,7 +19,8 @@ const app = express();
 
 app.use(cors({
     origin: [
-        "https://aiagent-mu-ruby.vercel.app"
+        "https://aiagent-mu-ruby.vercel.app",
+        "http://localhost:5173"
     ],
     credentials: true
 }));
@@ -32,18 +33,14 @@ app.get("/", (req, res) => {
     res.status(200).send("Auth Service is running!");
 });
 
-const PORT = process.env.PORT || 6001;
+const PORT = process.env.PORT || 8000;
 
-app.use("/api/auth", authRouter);
+app.use("/", authRouter);
 
 app.listen(PORT, () => {
     console.log(`Auth Service Started on ${PORT}`);
     connectDb();
 });
-
-
-
-
 
 
 

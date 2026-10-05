@@ -9,7 +9,6 @@ import { getCurrentUser } from "./controllers/user.controller.js"
 import { isAuth } from "./middleware/isAuth.js"
 import { proxyWithHeaders } from "./utils/proxyWithHeaders.js"
 const app = express()
-app.use(express.json())
 
 app.use(cors({
     origin:process.env.FRONTEND_URL,
@@ -35,8 +34,6 @@ app.get("/api/me",isAuth,getCurrentUser)
 
 
 
-
-
 app.listen(PORT , ()=>{
-    console.log(`Gateway Started on ${PORT}`)
+    console.log("Gateway Started on " + PORT)
 })

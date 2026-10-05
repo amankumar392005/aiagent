@@ -13,7 +13,7 @@ export const startInterview = async (req, res) => {
             useResume = false,
             resume = {}, } = req.body;
 
-        if (!type && !role) {
+        if (!type || !role) {
             return res.status(400).json({
                 success: false,
                 message: "Interview type and role are required",
@@ -86,7 +86,7 @@ export const submitAnswer = async (req, res) => {
         const userId = req.headers["x-user-id"]
         const { interviewId, answer } = req.body
 
-        if (!interviewId && !answer) {
+        if (!interviewId || !answer) {
             return res.status(400).json({
                 success: false,
                 message: "Interview Id and Answer are required",

@@ -22,6 +22,7 @@ function Step1setup({ user, setUser }) {
     const uploadResume = async () => {
         if (!file) {
             alert("Please select a PDF")
+            return
         }
         try {
             setUploading(true)
@@ -34,7 +35,8 @@ function Step1setup({ user, setUser }) {
             }))
             } catch (error) {
                 setUploading(false)
-                alert("Failed to use coins.")
+                const msg = error?.response?.data?.message || "Failed to use coins."
+                alert(msg)
                 return;
             }
 
@@ -42,7 +44,9 @@ function Step1setup({ user, setUser }) {
             const formData = new FormData()
             formData.append("resume", file)
 
-            const response = await api.post("/api/resume/upload", formData)
+            const response = await api.post("/api/resume/upload", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            })
 
             dispatch(setResume(response?.data?.data))
             setUploading(false)
@@ -68,7 +72,8 @@ function Step1setup({ user, setUser }) {
             }))
             } catch (error) {
                 setStarting(false)
-                alert("Failed to use coins.")
+                const msg = error?.response?.data?.message || "Failed to use coins."
+                alert(msg)
                 return;
             }
 

@@ -104,6 +104,13 @@ const sessionId = req.cookies?.session;
 
   const session = await redis.get(`session:${sessionId}`)
 
+  if (!session) {
+    return res.status(401).json({
+      success: false,
+      message: "Session expired",
+    });
+  }
+
   const sessionData = JSON.parse(session);
 
     const { coins, action } = req.body;

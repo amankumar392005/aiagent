@@ -84,6 +84,7 @@ function Scorer({ user, setUser }) {
     const uploadResume = async () => {
         if (!file) {
             alert("Please select a PDF")
+            return
         }
         try {
             setLoading(true)
@@ -95,14 +96,17 @@ function Scorer({ user, setUser }) {
                 }))
             } catch (error) {
                 setLoading(false)
-                alert("Failed to use coins.")
+                const msg = error?.response?.data?.message || "Failed to use coins."
+                alert(msg)
                 return;
             }
 
             const formData = new FormData()
             formData.append("resume", file)
 
-            const response = await api.post("/api/resume/upload", formData)
+            const response = await api.post("/api/resume/upload", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            })
 
             dispatch(setResume(response?.data?.data))
             setLoading(false)

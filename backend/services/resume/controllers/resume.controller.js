@@ -7,6 +7,48 @@ import extractText from "../config/pdf.js";
 import Resume from "../models/resume.model.js";
 import fs from "fs";
 
+// Sanitize LLM response to match the Mongoose schema
+const sanitizeResumeData = (data) => {
+    const ensureArrayOfObjects = (arr, keys) => {
+        if (!Array.isArray(arr)) return [];
+        return arr.map(item => {
+            if (typeof item === "string") {
+                return { [keys[0]]: item };
+            }
+            if (typeof item === "object" && item !== null) {
+                const obj = {};
+                for (const key of keys) {
+                    obj[key] = typeof item[key] === "string" ? item[key] : (item[key] != null ? String(item[key]) : "");
+                }
+                return obj;
+            }
+            return { [keys[0]]: String(item) };
+        });
+    };
+
+    const ensureStringArray = (arr) => {
+        if (!Array.isArray(arr)) return [];
+        return arr.map(item => typeof item === "string" ? item : String(item));
+    };
+
+    return {
+        name: data.name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        summary: data.summary || "",
+        score: Number(data.score) || 0,
+        skills: ensureStringArray(data.skills),
+        projects: ensureArrayOfObjects(data.projects, ["name", "description"]),
+        education: ensureArrayOfObjects(data.education, ["degree", "institution", "period", "cgpa"]),
+        experience: ensureArrayOfObjects(data.experience, ["title", "organization", "duration", "details"]),
+        strengths: ensureStringArray(data.strengths),
+        weaknesses: ensureStringArray(data.weaknesses),
+        missingSkills: ensureStringArray(data.missingSkills),
+        suggestedRole: data.suggestedRole || "",
+        recommendations: ensureStringArray(data.recommendations),
+    };
+};
+
 export const uploadResume = async (req, res) => {
     const file = req.file;
 
@@ -31,7 +73,14 @@ export const uploadResume = async (req, res) => {
 
         const aiResponse = await resumeAgent(resumeText);
 
-        const resumeData = JSON.parse(aiResponse);
+        // Strip markdown code fences if present
+        let cleanResponse = aiResponse.trim();
+        if (cleanResponse.startsWith("```")) {
+            cleanResponse = cleanResponse.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+        }
+
+        const rawData = JSON.parse(cleanResponse);
+        const resumeData = sanitizeResumeData(rawData);
 
         let resume = await Resume.findOne({ userId });
 
@@ -123,4 +172,3 @@ export const getResume = async (req, res) => {
         });
     }
 };
-

@@ -16,7 +16,7 @@ export const summaryAgent = async (data) => {
         return JSON.parse(cleaned)
     } catch (error) {
         console.log("Summary Agent Parse Error");
-    console.log(response.content);
+    console.log(error.message);
 
     throw new Error("Failed to generate Summary");
         
