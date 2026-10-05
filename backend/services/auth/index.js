@@ -34,7 +34,7 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 6001;
 
-app.use("/", authRouter);
+app.use("/api/auth", authRouter);
 
 app.listen(PORT, () => {
     console.log(`Auth Service Started on ${PORT}`);
