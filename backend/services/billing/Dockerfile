@@ -1,4 +1,4 @@
-FROM node
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY shared ./shared
 
 WORKDIR /app/services/billing
 
-EXPOSE 8004
+EXPOSE 8005
 
 CMD [ "npm","start" ]
 
