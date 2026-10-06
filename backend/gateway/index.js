@@ -10,9 +10,22 @@ import { isAuth } from "./middleware/isAuth.js"
 import { proxyWithHeaders } from "./utils/proxyWithHeaders.js"
 const app = express()
 
+// Allow multiple origins for CORS (production Vercel + local dev)
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173"
+].filter(Boolean)
+
 app.use(cors({
-    origin:process.env.FRONTEND_URL,
-    credentials:true
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true)
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true)
+        }
+        return callback(new Error("Not allowed by CORS"))
+    },
+    credentials: true
 }))
 
 app.use(morgan("dev"))
@@ -25,7 +38,14 @@ app.get("/" , (req,res)=>{
 })
 
 
-app.use("/api/auth" , proxy(process.env.AUTH_SERVICE_URL))
+// Auth proxy: strip /api/auth prefix before forwarding to auth service
+app.use("/api/auth" , proxy(process.env.AUTH_SERVICE_URL, {
+    proxyReqPathResolver: (req) => {
+        // req.url here is the path AFTER the mount point "/api/auth"
+        // e.g., for /api/auth/login, req.url = /login
+        return req.url
+    }
+}))
 app.use("/api/resume" ,isAuth, proxyWithHeaders(process.env.RESUME_SERVICE_URL))
 app.use("/api/interview",isAuth ,proxyWithHeaders(process.env.INTERVIEW_SERVICE_URL))
 app.use("/api/roadmap",isAuth ,proxyWithHeaders(process.env.ROADMAP_SERVICE_URL))

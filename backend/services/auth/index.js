@@ -2,7 +2,6 @@
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import cors from "cors";
 import { connectDb } from "./configs/db.js";
 import dns from "dns";
 
@@ -17,14 +16,7 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({
-    origin: [
-        "https://aiagent-mu-ruby.vercel.app",
-        "http://localhost:5173"
-    ],
-    credentials: true
-}));
-
+// No CORS needed — this service only receives internal traffic from the Gateway proxy
 app.use(express.json());
 app.use(cookieParser());
 

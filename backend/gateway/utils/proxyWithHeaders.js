@@ -7,6 +7,11 @@ export const proxyWithHeaders =(serviceUrl)=>{
         serviceUrl,
         {
           parseReqBody: false,
+          proxyReqPathResolver: (req) => {
+            // req.url is already relative to the mount point
+            // e.g., for /api/resume/get-resume mounted at /api/resume, req.url = /get-resume
+            return req.url
+          },
           proxyReqOptDecorator:(proxyReqOpts, srcReq) =>{
             if(srcReq.user){
                 proxyReqOpts.headers["x-user-id"]=srcReq.user.userId
